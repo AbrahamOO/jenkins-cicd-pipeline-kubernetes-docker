@@ -2,9 +2,10 @@
 # Implements security best practices and optimized builds
 
 # Stage 1: Base Python image with security updates
-FROM python:3.11-slim as base
+FROM python:3.11-slim AS base
 
 # Install security updates and required system packages
+# hadolint ignore=DL3008
 RUN apt-get update && \
     apt-get upgrade -y && \
     apt-get install -y --no-install-recommends \
@@ -18,12 +19,13 @@ RUN groupadd -r appuser && \
     useradd -r -g appuser -u 1000 -m -s /bin/bash appuser
 
 # Stage 2: Builder stage for dependencies
-FROM base as builder
+FROM base AS builder
 
 # Set working directory
 WORKDIR /build
 
 # Install build dependencies
+# hadolint ignore=DL3008
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
         gcc \
@@ -40,7 +42,7 @@ RUN python -m venv /opt/venv && \
     /opt/venv/bin/pip install --no-cache-dir -r requirements.txt
 
 # Stage 3: Final production image
-FROM base as production
+FROM base AS production
 
 # Set environment variables
 ENV PYTHONUNBUFFERED=1 \
