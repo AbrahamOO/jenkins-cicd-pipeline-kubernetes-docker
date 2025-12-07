@@ -77,3 +77,10 @@ monitoring/
 
 # Port change notes (local only)
 PORT_CHANGE_NOTE.md
+
+# Internal documentation (personal notes)
+PROJECT_SUMMARY.md
+VERIFICATION_CHECKLIST.md
+GITHUB_REPO_INFO.md
+QUICKSTART.md
+CONTRIBUTING.md
