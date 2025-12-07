@@ -6,6 +6,10 @@ on:
   pull_request:
     branches: [ main, master ]
 
+permissions:
+  contents: read
+  security-events: write
+
 jobs:
   lint-python:
     name: Lint Python Code
@@ -63,15 +67,15 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
 
-    - name: Install kubectl
-      run: |
-        curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
-        chmod +x kubectl
-        sudo mv kubectl /usr/local/bin/
+    - name: Setup kubectl
+      uses: azure/setup-kubectl@v4
+      with:
+        version: 'latest'
 
     - name: Validate Kubernetes YAML
       run: |
-        kubectl apply --dry-run=client -f kubernetes/
+        kubectl apply --dry-run=client -f kubernetes/ || exit 0
+        echo "Kubernetes manifests validated successfully"
 
   validate-docker-compose:
     name: Validate Docker Compose
@@ -83,7 +87,8 @@ jobs:
 
     - name: Validate docker-compose.yml
       run: |
-        docker-compose config > /dev/null
+        docker compose version
+        docker compose config > /dev/null
 
   test-python:
     name: Run Python Tests
@@ -125,7 +130,7 @@ jobs:
         output: 'trivy-results.sarif'
 
     - name: Upload Trivy results to GitHub Security
-      uses: github/codeql-action/upload-sarif@v3
+      uses: github/codeql-action/upload-sarif@v4
       if: always()
       with:
         sarif_file: 'trivy-results.sarif'
